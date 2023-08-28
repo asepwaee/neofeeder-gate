@@ -1,0 +1,17 @@
+{
+    "name": "aseplab/neofeeder",
+    "description": "Package Neofeeder untuk laravel",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Aseplab\\Neofeeder\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Asep Marzuki"
+        }
+    ],
+    "require": {}
+}
