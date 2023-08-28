@@ -3,7 +3,7 @@ namespace Aseplab\Neofeeder\App\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
-use Aseplab\Neofeeder\App\Helpers\Neofeeder;
+use Aseplab\Neofeeder\App\Helpers\NeoFeeder;
 class NeoDosenController extends Controller
 {
     
