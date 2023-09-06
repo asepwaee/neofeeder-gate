@@ -4,6 +4,7 @@ namespace Aseplab\Neofeeder\App\Http\Controllers;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
 use Aseplab\Neofeeder\App\Helpers\NeoFeeder;
+use Yajra\DataTables\DataTables;
 class NeoMahasiswaController extends Controller
 {
     
@@ -58,6 +59,7 @@ class NeoMahasiswaController extends Controller
 
                 $getTrendMahasiswa = new Neofeeder([
                     'act' => 'GetRekapJumlahMahasiswa',
+                    'filter'=> "nama_periode NOT LIKE '%Pendek%' ",
                     'order'=> 'id_periode asc'
                 ]);
                 $trend = $getTrendMahasiswa->getData()['data'];
@@ -78,6 +80,8 @@ class NeoMahasiswaController extends Controller
                     $grouped_data[$id_periode]['cuti'] += intval($item['cuti']);
                     $grouped_data[$id_periode]['non_aktif'] += intval($item['non_aktif']);
                 }
+                // dd($getProdi->getData()['data']);
+
             }else{
                 $aktif = 0;
                 $cuti = 0;
@@ -121,6 +125,12 @@ class NeoMahasiswaController extends Controller
                 }
                 // dd($label_semester_non_aktif);
                 $grouped_data = [];
+                // $nm_semester = new NeoFeeder([
+                //     'act' => 'GetListPeriodePerkuliahan',
+                //     'filter'=> "id_prodi='$_GET[prodi]' and id_semester='$_GET[semester]' ",
+                // ]);
+                // $dt = $nm_semester->getData()['data'];
+                // $prodi = $dt['nama_program_studi']
             }
         }else{
                 $getSemesterAktif = new NeoFeeder([
@@ -158,9 +168,11 @@ class NeoMahasiswaController extends Controller
 
                 $getTrendMahasiswa = new Neofeeder([
                     'act' => 'GetRekapJumlahMahasiswa',
+                    'filter'=> "nama_periode NOT LIKE '%Pendek%' ",
                     'order'=> 'id_periode asc',
                     'limit'=> ''
                 ]);
+                
                 $trend = $getTrendMahasiswa->getData()['data'];
                 foreach ($trend as $item) {
                     $id_periode = $item['id_periode'];
@@ -182,9 +194,29 @@ class NeoMahasiswaController extends Controller
 
                 
         }
+        $dataSms = $getSemester->getData()['data'];
+        // Create an empty array to store grouped data
+        $groupedData = [];
+        // Iterate through the data and create grouped format
+        foreach ($dataSms as $entry) {
+            $idSemester = $entry['id_semester'];
+            $namaSemester = $entry['nama_semester'];
+
+            // Check if the semester is already in the grouped format
+            if (!isset($groupedData[$idSemester])) {
+                $groupedData[$idSemester] = [
+                    'id_semester' => $idSemester,
+                    'nama_semester' => $namaSemester
+                ];
+            }
+        }
+
+        // Now, $groupedData contains the grouped format data with id_semester and nama_semester
+        $groupedData = array_values($groupedData); // Convert the associative array to indexed array if needed
+        // dd($groupedData);
         return view('neo::mahasiswa.index',[
             'prodi'                     =>$getProdi->getData()['data'],
-            'semester'                  =>$getSemester->getData()['data'],
+            'semester'                  =>$groupedData,
             // jumlah mahasiswa
             'aktif'                     =>$aktif,
             'cuti'                      =>$cuti, 
@@ -202,5 +234,18 @@ class NeoMahasiswaController extends Controller
             // trend mahasiswa
             'trend_mahasiswa'           =>$grouped_data
         ]);
+    }
+
+    public function data(){
+        return view('neo::mahasiswa.data');
+    }
+
+    public function get_data(){
+        $getDataMahasiswa = new Neofeeder([
+            'act' => 'GetAktivitasKuliahMahasiswa',
+            'filter'=>"id_semester = '$_GET[semester]' and id_status_mahasiswa='$_GET[status]'",
+        ]);
+        $data = $getDataMahasiswa->getData()['data'];
+        return Datatables::of($data)->make(true);
     }
 }
